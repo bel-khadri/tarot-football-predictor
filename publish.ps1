@@ -33,13 +33,30 @@ Set-Location -LiteralPath $projectDir
 $repoName = 'tarot-football-predictor'
 $repoDesc = 'Football predictor combining a 78-card tarot spread with Pythagorean and Chaldean numerology. Python, CLI and Streamlit UI.'
 
+# Open the authorisation page in Brave instead of the Windows default (Edge).
+$braveCandidates = @(
+    (Join-Path $env:ProgramFiles 'BraveSoftware\Brave-Browser\Application\brave.exe'),
+    (Join-Path ${env:ProgramFiles(x86)} 'BraveSoftware\Brave-Browser\Application\brave.exe'),
+    (Join-Path $env:LOCALAPPDATA 'BraveSoftware\Brave-Browser\Application\brave.exe')
+)
+$brave = $braveCandidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+
+if ($brave) {
+    $env:GH_BROWSER = $brave
+    Write-Host "Browser: Brave ($brave)" -ForegroundColor DarkGray
+} else {
+    Write-Host 'Browser: system default (Brave not found)' -ForegroundColor DarkGray
+    Write-Host 'Set $env:GH_BROWSER manually if Edge opens instead.' -ForegroundColor DarkGray
+}
+
 Write-Host ''
 Write-Host '=== STEP 1 of 2: signing in to GitHub ===' -ForegroundColor Cyan
-Write-Host 'A browser window will open. Click "Authorize github".'
-Write-Host 'This is the only step you have to do yourself.'
+Write-Host 'The one-time code is copied to your clipboard automatically.'
+Write-Host 'Paste it into the GitHub page, then click "Authorize github".'
 Write-Host ''
 
-& gh auth login --hostname github.com --git-protocol https --web --skip-ssh-key
+# --clipboard copies the one-time code so it never has to be read off the screen.
+& gh auth login --hostname github.com --git-protocol https --web --clipboard --skip-ssh-key
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Sign-in was cancelled or failed. Nothing was published.' -ForegroundColor Red
     Read-Host 'Press Enter to close'
