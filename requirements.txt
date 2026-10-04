@@ -1,0 +1,8 @@
+# Core application (standard library only)
+# No runtime dependencies are required for the CLI or the library.
+
+# Optional web UI
+streamlit>=1.29
+
+# Tests
+pytest>=7.0
